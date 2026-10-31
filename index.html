@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#050b20">
+<title>J.A.R.V.I.S. 3.0</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:radial-gradient(circle at top,#10295b,#050b20 65%);
+    color:#d9edff;
+    font-family:Arial,sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+}
+
+header{
+    padding:22px 15px;
+    text-align:center;
+    border-bottom:1px solid #087cff55;
+    box-shadow:0 5px 25px #087cff22;
+}
+
+header h1{
+    font-size:27px;
+    letter-spacing:5px;
+    color:#32aaff;
+    text-shadow:0 0 15px #008cff;
+}
+
+header p{
+    font-size:10px;
+    letter-spacing:4px;
+    margin-top:7px;
+    color:#78baff;
+}
+
+.clock{
+    text-align:center;
+    margin-top:22px;
+    font-size:25px;
+    letter-spacing:3px;
+    color:#58baff;
+}
+
+.date{
+    text-align:center;
+    font-size:12px;
+    color:#8abfff;
+    margin-top:7px;
+}
+
+.reactor{
+    width:190px;
+    height:190px;
+    border:3px solid #078cff;
+    border-radius:50%;
+    margin:35px auto 25px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    box-shadow:0 0 20px #008cff,
+               inset 0 0 25px #008cff;
+    animation:glow 2s infinite alternate;
+}
+
+.reactor:before,
+.reactor:after{
+    content:"";
+    position:absolute;
+    border-radius:50%;
+    border:2px dashed #40baff;
+    inset:10px;
+    animation:spin 12s linear infinite;
+}
+
+.reactor:after{
+    inset:25px;
+    border:2px solid #087cff;
+    animation:spin 7s linear infinite reverse;
+}
+
+.core{
+    width:85px;
+    height:85px;
+    border-radius:50%;
+    background:radial-gradient(circle,#fff,#70d5ff 35%,#007bff 75%);
+    box-shadow:0 0 30px #008cff;
+}
+
+@keyframes spin{
+    to{transform:rotate(360deg)}
+}
+
+@keyframes glow{
+    from{box-shadow:0 0 15px #008cff,inset 0 0 15px #008cff}
+    to{box-shadow:0 0 40px #008cff,inset 0 0 30px #008cff}
+}
+
+.status{
+    text-align:center;
+    font-size:13px;
+    letter-spacing:3px;
+    color:#54baff;
+    margin:15px;
+}
+
+.panel{
+    width:92%;
+    max-width:450px;
+    margin:20px auto;
+    padding:18px;
+    background:#081a38cc;
+    border:1px solid #087cff88;
+    border-radius:15px;
+    box-shadow:0 0 20px #007bff22;
+}
+
+.panel h3{
+    font-size:13px;
+    letter-spacing:2px;
+    color:#50baff;
+    margin-bottom:14px;
+}
+
+.chat{
+    height:190px;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    font-size:13px;
+}
+
+.message{
+    padding:11px;
+    border-radius:10px;
+    line-height:1.5;
+    overflow-wrap:anywhere;
+}
+
+.bot{
+    background:#0d2b54;
+    border-left:3px solid #168cff;
+}
+
+.user{
+    background:#123d70;
+    border-right:3px solid #48baff;
+    text-align:right;
+}
+
+.input-area{
+    display:flex;
+    gap:8px;
+    margin-top:15px;
+}
+
+input{
+    flex:1;
+    min-width:0;
+    padding:13px;
+    background:#06142d;
+    border:1px solid #168cff;
+    border-radius:9px;
+    color:white;
+    outline:none;
+}
+
+button{
+    background:transparent;
+    color:#58baff;
+    border:1px solid #168cff;
+    border-radius:9px;
+    padding:12px 15px;
+    cursor:pointer;
+    transition:.2s;
+    font-weight:bold;
+}
+
+button:active{
+    transform:scale(.90);
+    background:#087cff55;
+}
+
+button:hover{
+    box-shadow:0 0 15px #087cff;
+}
+
+.mic-area{
+    text-align:center;
+    margin:25px 0;
+}
+
+.mic{
+    width:75px;
+    height:75px;
+    border-radius:50%;
+    font-size:27px;
+    background:#071a38;
+    box-shadow:0 0 20px #087cff66;
+}
+
+.mic.listening{
+    animation:pulse .8s infinite alternate;
+    background:#0755a5;
+}
+
+@keyframes pulse{
+    to{box-shadow:0 0 35px #00aaff}
+}
+
+.controls{
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:18px;
+}
+
+select{
+    background:#071a38;
+    color:#58baff;
+    border:1px solid #168cff;
+    padding:11px;
+    border-radius:8px;
+}
+
+footer{
+    text-align:center;
+    padding:25px;
+    font-size:10px;
+    color:#438bc7;
+    letter-spacing:3px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>J.A.R.V.I.S.</h1>
+    <p>JUST A RATHER VERY INTELLIGENT SYSTEM</p>
+</header>
+
+<div class="clock" id="clock">00:00:00</div>
+<div class="date" id="date"></div>
+
+<div class="reactor">
+    <div class="core"></div>
+</div>
+
+<div class="status" id="status">SYSTEM ONLINE</div>
+
+<div class="mic-area">
+    <button class="mic" id="mic" onclick="toggleMic()">🎙️</button>
+    <p style="font-size:12px;margin-top:12px;color:#70baff">
+        TAP TO TALK WITH JARVIS
+    </p>
+</div>
+
+<div class="panel">
+    <h3>◈ COMMUNICATION TERMINAL</h3>
+
+    <div class="chat" id="chat">
+        <div class="message bot">
+            Hello Ayush Stark! I am JARVIS 3.0.
+            <br><br>
+            Systems are online. How may I assist you, Sir?
+        </div>
+    </div>
+
+    <div class="input-area">
+        <input id="input" placeholder="Talk to JARVIS..."
+        onkeydown="if(event.key==='Enter')sendMessage()">
+        <button onclick="sendMessage()">SEND</button>
+    </div>
+
+    <div class="controls">
+        <select id="language" onchange="changeLanguage()">
+            <option value="hi-IN">Hindi</option>
+            <option value="en-US">English</option>
+        </select>
+
+        <button onclick="stopSpeech()">🔇 STOP VOICE</button>
+    </div>
+</div>
+
+<div class="panel">
+    <h3>◈ SYSTEM INFORMATION</h3>
+    <p style="font-size:12px;line-height:2;color:#8dcaff">
+        SYSTEM : JARVIS 3.0<br>
+        VERSION : BLUE EDITION<br>
+        STATUS : OPERATIONAL<br>
+        INTERFACE : MOBILE<br>
+        VOICE ENGINE : BROWSER SPEECH API
+    </p>
+</div>
+
+<footer>
+    CREATED FOR AYUSH STARK<br><br>
+    J.A.R.V.I.S. BLUE EDITION
+</footer>
+
+<script>
+
+const chat=document.getElementById("chat");
+const input=document.getElementById("input");
+const statusText=document.getElementById("status");
+const mic=document.getElementById("mic");
+const language=document.getElementById("language");
+
+let recognition=null;
+let listening=false;
+
+function updateClock(){
+    const now=new Date();
+
+    document.getElementById("clock").textContent=
+    now.toLocaleTimeString("en-IN");
+
+    document.getElementById("date").textContent=
+    now.toLocaleDateString("en-IN",{
+        weekday:"long",
+        day:"numeric",
+        month:"long",
+        year:"numeric"
+    });
+}
+
+setInterval(updateClock,1000);
+updateClock();
+
+function addMessage(text,type){
+    const div=document.createElement("div");
+    div.className="message "+type;
+    div.textContent=text;
+    chat.appendChild(div);
+    chat.scrollTop=chat.scrollHeight;
+}
+
+function speak(text){
+    if(!("speechSynthesis" in window)){
+        statusText.textContent="VOICE NOT SUPPORTED";
+        return;
+    }
+
+    speechSynthesis.cancel();
+
+    const speech=new SpeechSynthesisUtterance(text);
+    speech.lang=language.value;
+    speech.rate=0.95;
+    speech.pitch=1;
+
+    speech.onstart=()=>{
+        statusText.textContent="JARVIS SPEAKING";
+    };
+
+    speech.onend=()=>{
+        statusText.textContent="SYSTEM ONLINE";
+    };
+
+    speechSynthesis.speak(speech);
+}
+
+function stopSpeech(){
+    speechSynthesis.cancel();
+    statusText.textContent="SYSTEM ONLINE";
+}
+
+function changeLanguage(){
+    const msg=language.value==="hi-IN"
+    ?"भाषा हिंदी में बदल दी गई है, सर।"
+    :"Language changed to English, Sir.";
+
+    addMessage(msg,"bot");
+    speak(msg);
+}
+
+function processCommand(message){
+
+    const text=message.toLowerCase();
+
+    if(text.includes("hello") || text.includes("hi jarvis") ||
+       text.includes("नमस्ते") || text.includes("हेलो")){
+
+        return language.value==="hi-IN"
+        ?"नमस्ते आयुष स्टार्क! मैं आपकी क्या सहायता कर सकता हूँ?"
+        :"Hello Ayush Stark! How can I help you, Sir?";
+    }
+
+    if(text.includes("time") || text.includes("समय") ||
+       text.includes("टाइम")){
+
+        return language.value==="hi-IN"
+        ?"सर, अभी समय है "+new Date().toLocaleTimeString("hi-IN")
+        :"Sir, the current time is "+new Date().toLocaleTimeString();
+    }
+
+    if(text.includes("date") || text.includes("तारीख")){
+
+        return language.value==="hi-IN"
+        ?"आज "+new Date().toLocaleDateString("hi-IN")
+        :"Today's date is "+new Date().toDateString();
+    }
+
+    if(text.includes("your name") || text.includes("तुम्हारा नाम")){
+
+        return language.value==="hi-IN"
+        ?"मेरा नाम जार्विस है, सर।"
+        :"My name is JARVIS, Sir.";
+    }
+
+    if(text.includes("who am i") || text.includes("मेरा नाम")){
+
+        return language.value==="hi-IN"
+        ?"आप आयुष स्टार्क हैं, सर!"
+        :"You are Ayush Stark, Sir!";
+    }
+
+    if(text.includes("open youtube") || text.includes("यूट्यूब खोलो")){
+        window.open("https://www.youtube.com","_blank");
+        return language.value==="hi-IN"
+        ?"यूट्यूब खोल रहा हूँ, सर।"
+        :"Opening YouTube, Sir.";
+    }
+
+    if(text.includes("open google") || text.includes("गूगल खोलो")){
+        window.open("https://www.google.com","_blank");
+        return language.value==="hi-IN"
+        ?"गूगल खोल रहा हूँ, सर।"
+        :"Opening Google, Sir.";
+    }
+
+    if(text.includes("thank") || text.includes("धन्यवाद")){
+        return language.value==="hi-IN"
+        ?"आपका स्वागत है, सर!"
+        :"You're welcome, Sir!";
+    }
+
+    if(text.includes("how are you") || text.includes("कैसे हो")){
+        return language.value==="hi-IN"
+        ?"मैं पूरी तरह ऑपरेशनल हूँ, सर!"
+        :"All systems operational, Sir!";
+    }
+
+    return language.value==="hi-IN"
+    ?"सर, यह कमांड अभी मेरे बेसिक सिस्टम में उपलब्ध नहीं है। असली AI कनेक्शन जोड़ने के बाद मैं इसका जवाब दे सकूँगा।"
+    :"Sir, this command is not available in my basic system yet. I will need an AI connection to answer this.";
+}
+
+function sendMessage(){
+
+    const message=input.value.trim();
+
+    if(!message)return;
+
+    addMessage(message,"user");
+    input.value="";
+
+    statusText.textContent="PROCESSING";
+
+    const reply=processCommand(message);
+
+    setTimeout(()=>{
+        addMessage(reply,"bot");
+        speak(reply);
+    },400);
+}
+
+function toggleMic(){
+
+    const SpeechRecognition=
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+    if(!SpeechRecognition){
+        addMessage(
+        "Voice recognition is not supported in this browser. Please try Chrome.",
+        "bot");
+        return;
+    }
+
+    if(listening){
+        recognition.stop();
+        return;
+    }
+
+    recognition=new SpeechRecognition();
+    recognition.lang=language.value;
+    recognition.continuous=false;
+    recognition.interimResults=false;
+
+    recognition.onstart=()=>{
+        listening=true;
+        mic.classList.add("listening");
+        statusText.textContent="LISTENING...";
+    };
+
+    recognition.onresult=(event)=>{
+        const result=event.results[0][0].transcript;
+        input.value=result;
+        sendMessage();
+    };
+
+    recognition.onerror=(event)=>{
+        statusText.textContent="MIC ERROR: "+event.error;
+    };
+
+    recognition.onend=()=>{
+        listening=false;
+        mic.classList.remove("listening");
+
+        if(statusText.textContent==="LISTENING..."){
+            statusText.textContent="SYSTEM ONLINE";
+        }
+    };
+
+    recognition.start();
+}
+
+</script>
+
+</body>
+  </html>
