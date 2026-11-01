@@ -471,7 +471,7 @@ async function sendMessage(){
     try{
 
         const response=await fetch(
-            "https://nameless-bread-04d2jarvis-ai-brain.ashsidetech.workers.dev/",
+            ""
             {
                 method:"POST",
                 headers:{
@@ -490,7 +490,7 @@ console.log("JARVIS AI RESPONSE:", data);
         }
 
         addMessage(data.reply,"bot");
-        speak(data.reply);
+        speak(data.reply);"https://purple-night-9332jarvis-ai-brain.ashsidetech.workers.dev/",
 
         statusText.textContent="JARVIS ONLINE";
 
