@@ -484,7 +484,7 @@ async function sendMessage(){
         );
 
         const data=await response.json();
-
+console.log("JARVIS AI RESPONSE:", data);
         if(!response.ok || !data.success){
             throw new Error(data.error || "AI request failed");
         }
