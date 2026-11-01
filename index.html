@@ -457,7 +457,7 @@ function processCommand(message){
     :"Sir, this command is not available in my basic system yet. I will need an AI connection to answer this.";
 }
 
-function sendMessage(){
+async function sendMessage(){
 
     const message=input.value.trim();
 
@@ -466,14 +466,44 @@ function sendMessage(){
     addMessage(message,"user");
     input.value="";
 
-    statusText.textContent="PROCESSING";
+    statusText.textContent="CONNECTING TO GEMINI...";
 
-    const reply=processCommand(message);
+    try{
 
-    setTimeout(()=>{
-        addMessage(reply,"bot");
-        speak(reply);
-    },400);
+        const response=await fetch(
+            "https://nameless-bread-04d2jarvis-ai-brain.ashsidetech.workers.dev/",
+            {
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+                    message:message
+                })
+            }
+        );
+
+        const data=await response.json();
+
+        if(!response.ok || !data.success){
+            throw new Error(data.error || "AI request failed");
+        }
+
+        addMessage(data.reply,"bot");
+        speak(data.reply);
+
+        statusText.textContent="JARVIS ONLINE";
+
+    }catch(error){
+
+        const errorMessage="Sir, Gemini connection error: "+error.message;
+
+        addMessage(errorMessage,"bot");
+        speak(errorMessage);
+
+        statusText.textContent="CONNECTION ERROR";
+
+    }
 }
 
 function toggleMic(){
